@@ -1,7 +1,6 @@
 import { useState } from "react";
 
-const AddTodo = ( { addTodo }) => {
-
+const AddTodo = ({ addTodo }) => {
   const handleKeyPress = (event) => {
     if (event.key === "Enter") {
       const input = event.target;
@@ -11,7 +10,7 @@ const AddTodo = ( { addTodo }) => {
         input.value = "";
       }
     }
-  }
+  };
 
   return (
     <input
@@ -22,29 +21,37 @@ const AddTodo = ( { addTodo }) => {
   );
 };
 
-const TodoFilter = () => {
+const TodoFilter = ({ currentFilter, setFilter }) => {
+  const filters = [
+    { id: "all", label: "Todos os itens" },
+    { id: "done", label: "Concluídos" },
+    { id: "pending", label: "Pendentes" },
+  ];
+
   return (
     <div className="center-content">
-      <a href="#" id="filter-all">
-        Todos os itens
-      </a>
-      <a href="#" id="filter-done">
-        Concluídos
-      </a>
-      <a href="#" id="filter-pending">
-        Pendentes
-      </a>
+      {filters.map((filter) => (
+        <a
+          key={filter.id}
+          href="#"
+          onClick={() => setFilter(filter.id)}
+          style={{
+            margin: "0 8px",
+            textDecoration: currentFilter === filter.id ? "underline" : "none",
+          }}
+        >
+          {filter.label}
+        </a>
+      ))}
     </div>
   );
 };
 
 const TodoItem = ({ todo, markTodoAsDone }) => {
-  
   const handleClick = () => {
     markTodoAsDone(todo.id);
-  }
+  };
 
-  
   return (
     <>
       {todo.done ? (
@@ -60,12 +67,17 @@ const TodoItem = ({ todo, markTodoAsDone }) => {
 };
 
 const TodoList = () => {
-  const [todos, setTodos] = useState([{id: crypto.randomUUID(), text: "Learn React", done: false }, {id: crypto.randomUUID(), text: "Learn JS", done: true }]);
+  const [todos, setTodos] = useState([
+    { id: crypto.randomUUID(), text: "Learn React", done: false },
+    { id: crypto.randomUUID(), text: "Learn JS", done: true },
+  ]);
+
+  const [filter, setFilter] = useState("all");
 
   const addTodo = (text) => {
     const newTodo = { id: crypto.randomUUID(), text, done: false };
     setTodos((prevTodos) => [...prevTodos, newTodo]);
-  }
+  };
 
   const markTodoAsDone = (id) => {
     setTodos((prevTodos) =>
@@ -73,20 +85,24 @@ const TodoList = () => {
         todo.id === id ? { ...todo, done: true } : todo
       )
     );
-  }
+  };
 
+  const filteredTodos = todos.filter((todo) => {
+    if (filter === "done") return todo.done;
+    if (filter === "pending") return !todo.done;
+    return true;
+  });
 
   return (
     <>
       <h1>Todo List</h1>
       <div className="center-content">
-        Versão inicial da aplicação de lista de tarefas para a disciplina
-        SPODWE2
+        Versão inicial da aplicação de lista de tarefas para a disciplina SPODWE2
       </div>
-      <TodoFilter />
+      <TodoFilter currentFilter={filter} setFilter={setFilter} />
       <AddTodo addTodo={addTodo} />
       <ul id="todo-list">
-        {todos.map((todo, index) => (
+        {filteredTodos.map((todo, index) => (
           <TodoItem key={index} todo={todo} markTodoAsDone={markTodoAsDone} />
         ))}
       </ul>
